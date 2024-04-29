@@ -1,0 +1,6 @@
+type Order {
+    id: ID!
+    info: String
+    shipmentID: Int
+    returnID: Int
+}

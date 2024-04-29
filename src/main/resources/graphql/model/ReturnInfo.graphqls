@@ -1,0 +1,5 @@
+type ReturnInfo {
+    id: ID!
+    accepted: Boolean
+    reason: String
+}

@@ -1,0 +1,5 @@
+type Shipment {
+    id: ID!
+    address: String
+    date: String
+}

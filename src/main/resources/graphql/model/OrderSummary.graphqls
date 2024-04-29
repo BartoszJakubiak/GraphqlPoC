@@ -1,0 +1,5 @@
+type OrderSummary {
+    order: Order
+    shipment: Shipment
+    returnInfo: ReturnInfo
+}

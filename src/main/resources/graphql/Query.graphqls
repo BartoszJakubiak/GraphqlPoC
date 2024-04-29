@@ -1,0 +1,3 @@
+type Query {
+    orderSummary(id: ID): OrderSummary
+}
