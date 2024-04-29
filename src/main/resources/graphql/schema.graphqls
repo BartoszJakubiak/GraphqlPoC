@@ -1,0 +1,31 @@
+type Order {
+    id: ID!
+    info: String
+    shipmentID: Int
+    returnID: Int
+    shipment: Shipment
+    returnInfo: ReturnInfo
+}
+#Possible to extend Orders during development
+#extend type Order {
+#    shipment: Shipment
+#    return: Returninfo
+#}
+
+type Shipment {
+    id: ID!
+    address: String
+    date: String
+}
+
+type ReturnInfo {
+    id: ID!
+    accepted: Boolean
+    reason: String
+}
+
+type Query {
+    order(id: ID!): Order
+    returnInfo(id: ID!): ReturnInfo
+    shipment(id: ID!): Shipment
+}
