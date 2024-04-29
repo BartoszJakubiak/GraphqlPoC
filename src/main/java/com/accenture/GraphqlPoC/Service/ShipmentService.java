@@ -1,7 +1,6 @@
 package com.accenture.GraphqlPoC.Service;
 
-import com.accenture.GraphqlPoC.Model.Shipment;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
+import com.accenture.GraphqlPoC.Model.Parts.Shipment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

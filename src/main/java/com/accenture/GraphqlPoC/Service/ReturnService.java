@@ -1,6 +1,6 @@
 package com.accenture.GraphqlPoC.Service;
 
-import com.accenture.GraphqlPoC.Model.ReturnInfo;
+import com.accenture.GraphqlPoC.Model.Parts.ReturnInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
