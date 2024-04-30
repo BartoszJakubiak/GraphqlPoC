@@ -9,14 +9,21 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ReturnInfoResolver {
     private final ReturnService returnService;
+
     public ReturnInfoResolver(ReturnService returnService) {
         this.returnService = returnService;
     }
 
-//    @QueryMapping
-    public ReturnInfo returnInfo(Integer id) {
+    @QueryMapping
+    public ReturnInfo returnInfo(@Argument Integer id) {
         System.out.println("ReturnInfo resolver - breakpoint");
         return returnService.specificReturn(id);
     }
+
+//    @QueryMapping
+//    public ReturnInfo returnInfoQuery(@Argument Integer id) {
+//        System.out.println("ReturnInfo resolver - breakpoint");
+//        return returnService.specificReturn(id);
+//    }
 
 }

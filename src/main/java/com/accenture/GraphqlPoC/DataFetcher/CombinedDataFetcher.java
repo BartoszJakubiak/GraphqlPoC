@@ -43,7 +43,8 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
         if (environment.getSelectionSet().contains("shipment")) {
             builder.shipment(shipmentResolver.shipment(order.shipmentID()));
         }
-
+        System.out.println("-------------------------------------");
+//        System.out.println(environment.getSelectionSet());
         return builder.build();
     }
 }

@@ -16,8 +16,7 @@ public class OrderResolver {
         this.orderService = orderService;
     }
 
-//    @QueryMapping
-    public Order order(@Argument Integer id) {
+    public Order order(Integer id) {
         System.out.println("Order resolver - breakpoint");
         return orderService.specificOrder(id);
     }

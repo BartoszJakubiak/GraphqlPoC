@@ -14,8 +14,8 @@ public class ShipmentResolver {
         this.shipmentService = shipmentService;
     }
 
-//    @QueryMapping
-    public Shipment shipment(Integer id) {
+    @QueryMapping
+    public Shipment shipment(@Argument Integer id) {
         System.out.println("Shipment resolver - breakpoint");
         return shipmentService.specificShipment(id);
     }

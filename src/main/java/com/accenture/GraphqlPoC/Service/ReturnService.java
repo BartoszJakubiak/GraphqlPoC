@@ -15,8 +15,8 @@ public class ReturnService {
         this.objectMapper = objectMapper;
     }
     public ReturnInfo specificReturn(Integer id) {
-//        String url = String.format("http://localhost:3001/return/%d",id);
-        String url = "http://localhost:3001/return/1";
+        String url = String.format("http://localhost:3001/return/%d",id);
+//        String url = "http://localhost:3001/return/1";
         RestTemplate restTemplate = new RestTemplate();
         String jsonFile = restTemplate.getForObject(url, String.class);
         try {

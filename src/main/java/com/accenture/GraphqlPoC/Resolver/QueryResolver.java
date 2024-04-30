@@ -3,6 +3,7 @@ package com.accenture.GraphqlPoC.Resolver;
 import com.accenture.GraphqlPoC.DataFetcher.CombinedDataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 @Controller
