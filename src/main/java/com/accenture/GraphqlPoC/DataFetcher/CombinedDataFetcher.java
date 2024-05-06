@@ -2,13 +2,21 @@ package com.accenture.GraphqlPoC.DataFetcher;
 
 import com.accenture.GraphqlPoC.Model.Builder;
 import com.accenture.GraphqlPoC.Model.Parts.Order;
+import com.accenture.GraphqlPoC.Model.Parts.ReturnInfo;
+import com.accenture.GraphqlPoC.Model.Parts.Shipment;
 import com.accenture.GraphqlPoC.Resolver.PartsResolvers.OrderResolver;
 import com.accenture.GraphqlPoC.Resolver.PartsResolvers.ReturnInfoResolver;
 import com.accenture.GraphqlPoC.Resolver.PartsResolvers.ShipmentResolver;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.DataFetchingFieldSelectionSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class CombinedDataFetcher implements DataFetcher<Object> {
@@ -31,20 +39,48 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
 
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
+        /** Order object is mandatory **/
         String id = environment.getArgument("id");
         Integer orderId = Integer.valueOf(id);
         Order order = orderResolver.order(orderId);
-        builder.order(order);
+        ReturnInfo returnInfo = null;
+        Shipment shipment = null;
 
-        if (environment.getSelectionSet().contains("returnInfo")) {
-            builder.returnInfo(returnInfoResolver.returnInfo(order.returnID()));
+
+        /** ReturnInfo and Shipment are optional - depending on selectionSet's content.
+         *  reutrnInfo() and shipment() methods on Resolver level are @Async **/
+        DataFetchingFieldSelectionSet selectionSet = environment.getSelectionSet();
+        List<CompletableFuture<?>> asyncParts = new ArrayList<>();
+        CompletableFuture<ReturnInfo> returnInfoAsync = null;
+        CompletableFuture<Shipment> shipmentAsync = null;
+
+        if (selectionSet.contains("returnInfo")) {
+//            CompletableFuture<ReturnInfo> returnInfoAsync = returnInfoResolver.returnInfo(order.returnID());
+            returnInfoAsync = returnInfoResolver.returnInfo(order.returnID());
+            asyncParts.add(returnInfoAsync);
+        }
+        if (selectionSet.contains("shipment")) {
+//            CompletableFuture<Shipment> shipmentAsync = shipmentResolver.shipment(order.shipmentID());
+            shipmentAsync = shipmentResolver.shipment(order.shipmentID());
+            asyncParts.add(shipmentAsync);
         }
 
-        if (environment.getSelectionSet().contains("shipment")) {
-            builder.shipment(shipmentResolver.shipment(order.shipmentID()));
+        CompletableFuture<?>[] asyncPartsThreads = asyncParts.toArray(new CompletableFuture[0]);
+        CompletableFuture.allOf(asyncPartsThreads).join();
+
+        if (selectionSet.contains("returnInfo")) {
+            returnInfo = returnInfoAsync.get();
         }
-        System.out.println("-------------------------------------");
-//        System.out.println(environment.getSelectionSet());
+        if (selectionSet.contains("shipment")) {
+            shipment = shipmentAsync.get();
+        }
+
+        builder.order(order)
+                .shipment(shipment)
+                .returnInfo(returnInfo);
         return builder.build();
     }
+
+
+
 }

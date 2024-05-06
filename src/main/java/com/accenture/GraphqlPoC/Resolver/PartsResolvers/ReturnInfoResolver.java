@@ -4,7 +4,10 @@ import com.accenture.GraphqlPoC.Model.Parts.ReturnInfo;
 import com.accenture.GraphqlPoC.Service.ReturnService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 public class ReturnInfoResolver {
@@ -14,16 +17,11 @@ public class ReturnInfoResolver {
         this.returnService = returnService;
     }
 
+    @Async
     @QueryMapping
-    public ReturnInfo returnInfo(@Argument Integer id) {
+    public CompletableFuture<ReturnInfo> returnInfo(@Argument Integer id) {
         System.out.println("ReturnInfo resolver - breakpoint");
-        return returnService.specificReturn(id);
+        ReturnInfo returnInfo = returnService.specificReturn(id);
+        return CompletableFuture.completedFuture(returnInfo);
     }
-
-//    @QueryMapping
-//    public ReturnInfo returnInfoQuery(@Argument Integer id) {
-//        System.out.println("ReturnInfo resolver - breakpoint");
-//        return returnService.specificReturn(id);
-//    }
-
 }
