@@ -11,7 +11,6 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-public class CombinedDataFetcher implements DataFetcher<Object> {
+public class SpecificOrderDataFetcher implements DataFetcher<Object> {
 
     private final OrderResolver orderResolver;
     private final ReturnInfoResolver returnInfoResolver;
@@ -27,10 +26,10 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
     private final Builder builder;
 
     @Autowired
-    public CombinedDataFetcher(OrderResolver orderResolver,
-                               ReturnInfoResolver returnInfoResolver,
-                               ShipmentResolver shipmentResolver,
-                               Builder builder) {
+    public SpecificOrderDataFetcher(OrderResolver orderResolver,
+                                    ReturnInfoResolver returnInfoResolver,
+                                    ShipmentResolver shipmentResolver,
+                                    Builder builder) {
         this.orderResolver = orderResolver;
         this.returnInfoResolver = returnInfoResolver;
         this.shipmentResolver = shipmentResolver;
@@ -40,12 +39,7 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
         /** Order object is mandatory **/
-        String id = environment.getArgument("id");
-        Integer orderId = Integer.valueOf(id);
-        Order order = orderResolver.order(orderId);
-        ReturnInfo returnInfo = null;
-        Shipment shipment = null;
-
+        Order order = orderResolver.order(Integer.valueOf(environment.getArgument("id")));
 
         /** ReturnInfo and Shipment are optional - depending on selectionSet's content.
          *  reutrnInfo() and shipment() methods on Resolver level are @Async **/
@@ -55,12 +49,10 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
         CompletableFuture<Shipment> shipmentAsync = null;
 
         if (selectionSet.contains("returnInfo")) {
-//            CompletableFuture<ReturnInfo> returnInfoAsync = returnInfoResolver.returnInfo(order.returnID());
             returnInfoAsync = returnInfoResolver.returnInfo(order.returnID());
             asyncParts.add(returnInfoAsync);
         }
         if (selectionSet.contains("shipment")) {
-//            CompletableFuture<Shipment> shipmentAsync = shipmentResolver.shipment(order.shipmentID());
             shipmentAsync = shipmentResolver.shipment(order.shipmentID());
             asyncParts.add(shipmentAsync);
         }
@@ -68,16 +60,13 @@ public class CombinedDataFetcher implements DataFetcher<Object> {
         CompletableFuture<?>[] asyncPartsThreads = asyncParts.toArray(new CompletableFuture[0]);
         CompletableFuture.allOf(asyncPartsThreads).join();
 
+        builder.order(order);
         if (selectionSet.contains("returnInfo")) {
-            returnInfo = returnInfoAsync.get();
+            builder.returnInfo(returnInfoAsync.get());
         }
         if (selectionSet.contains("shipment")) {
-            shipment = shipmentAsync.get();
+            builder.shipment(shipmentAsync.get());
         }
-
-        builder.order(order)
-                .shipment(shipment)
-                .returnInfo(returnInfo);
         return builder.build();
     }
 

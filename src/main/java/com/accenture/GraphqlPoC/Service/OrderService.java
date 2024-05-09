@@ -14,12 +14,15 @@ public class OrderService {
     public Order specificOrder(Integer id) {
         return orders.get(id);
     }
+    public List<Order> allOrders() {
+        return orders;
+    }
 
     @PostConstruct
     private void init() {
-        orders.add(new Order(0, "order no 0", 1,1));
-        orders.add(new Order(1, "order no 1",2,1));
-        orders.add(new Order(2, "order no 2",1,2));
+        orders.add(new Order(0, "order no 0", 0,0));
+        orders.add(new Order(1, "order no 1",1,0));
+        orders.add(new Order(2, "order no 2",0,1));
     }
 
 

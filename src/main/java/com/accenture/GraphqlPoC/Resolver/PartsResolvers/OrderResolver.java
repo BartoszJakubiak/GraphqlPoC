@@ -6,6 +6,8 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 
 @Controller
 public class OrderResolver {
@@ -17,7 +19,11 @@ public class OrderResolver {
     }
 
     public Order order(Integer id) {
-        System.out.println("Order resolver - breakpoint");
+//        System.out.println("Order resolver - breakpoint");
         return orderService.specificOrder(id);
+    }
+
+    public List<Order> allOrders() {
+        return orderService.allOrders();
     }
 }

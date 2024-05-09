@@ -2,4 +2,8 @@ type Query {
     orderSummary(id: ID): OrderSummary
     returnInfo(id: ID): ReturnInfo
     shipment(id: ID): Shipment
+
+    allReturnInfo: [ReturnInfo]
+    allShipment: [Shipment]
+    allOrderSummary: [OrderSummary]
 }

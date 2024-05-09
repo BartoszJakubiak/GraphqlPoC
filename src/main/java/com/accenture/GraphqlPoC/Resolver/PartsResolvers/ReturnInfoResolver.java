@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
@@ -21,7 +22,13 @@ public class ReturnInfoResolver {
     @QueryMapping
     public CompletableFuture<ReturnInfo> returnInfo(@Argument Integer id) {
         System.out.println("ReturnInfo resolver - breakpoint");
-        ReturnInfo returnInfo = returnService.specificReturn(id);
-        return CompletableFuture.completedFuture(returnInfo);
+        return CompletableFuture.completedFuture(returnService.specificReturn(id));
+    }
+
+    @Async
+    @QueryMapping
+    public CompletableFuture<List<ReturnInfo>> allReturnInfo() {
+        System.out.println("ReturnInfo resolver - breakpoint");
+        return CompletableFuture.completedFuture(returnService.allReturnInfo());
     }
 }

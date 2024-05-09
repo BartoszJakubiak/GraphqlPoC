@@ -29,7 +29,11 @@ public class Builder {
     }
 
     public OrderSummary build() {
-        return new OrderSummary(this);
+        OrderSummary orderSummary = new OrderSummary(this);
+        this.order = null;
+        this.shipment = null;
+        this.returnInfo = null;
+        return orderSummary;
     }
 }
 
