@@ -14,6 +14,7 @@ import graphql.schema.DataFetchingFieldSelectionSet;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 @Component
@@ -32,7 +33,7 @@ public class AllOrdersDataFetcher implements DataFetcher<Object> {
     }
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
-        List<Order> orders = orderResolver.allOrders();
+        List<Order> orders = new ArrayList<>(orderResolver.allOrders());
 
         DataFetchingFieldSelectionSet selectionSet = environment.getSelectionSet();
         List<CompletableFuture<?>> asyncParts = new ArrayList<>();
@@ -51,6 +52,16 @@ public class AllOrdersDataFetcher implements DataFetcher<Object> {
         CompletableFuture<?>[] asyncPartsThreads = asyncParts.toArray(new CompletableFuture[0]);
         CompletableFuture.allOf(asyncPartsThreads).join();
 
+        if (environment.containsArgument("accepted")) {
+            Iterator<Order> iterator = orders.iterator();
+            while (iterator.hasNext()){
+                Order order = iterator.next();
+                if (returnInfoAsync.get()
+                        .get(order.returnID()).accepted() != environment.getArgument("accepted")) {
+                    iterator.remove();
+                }
+            }
+        }
 
         List<OrderSummary> orderSummaries = new ArrayList<>();
         for (Order order: orders) {
