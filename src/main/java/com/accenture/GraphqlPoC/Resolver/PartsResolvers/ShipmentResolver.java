@@ -20,14 +20,6 @@ public class ShipmentResolver {
     }
 
     @Async
-    @QueryMapping
-    public CompletableFuture<Shipment> shipment(@Argument Integer id) {
-        System.out.println("Shipment resolver - breakpoint");
-        return CompletableFuture.completedFuture(shipmentService.specificShipment(id));
-    }
-
-    @Async
-    @QueryMapping
     public CompletableFuture<List<Shipment>> allShipment(DataFetchingEnvironment environment) {
         System.out.println("Shipment resolver - breakpoint");
         return CompletableFuture.completedFuture(shipmentService.allShipment(environment));

@@ -35,7 +35,7 @@ public class AllOrdersDataFetcher implements DataFetcher<Object> {
 
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
-        List<Order> orders = orderResolver.allOrders();
+        List<Order> orders = orderResolver.allOrders(environment);
 
         DataFetchingFieldSelectionSet selectionSet = environment.getSelectionSet();
         List<CompletableFuture<?>> asyncParts = new ArrayList<>();

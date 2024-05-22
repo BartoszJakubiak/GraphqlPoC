@@ -1,9 +1,3 @@
 type Query {
-    orderSummary(id: ID): OrderSummary
-    returnInfo(id: ID): ReturnInfo
-    shipment(id: ID): Shipment
-
-    allReturnInfo(accepted: Boolean): [ReturnInfo]
-    allShipment: [Shipment]
-    allOrderSummary(accepted: Boolean, delayed: Boolean): [OrderSummary]
+    allOrderSummary(id: ID, accepted: Boolean, delayed: Boolean): [OrderSummary]
 }

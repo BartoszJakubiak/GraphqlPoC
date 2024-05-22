@@ -20,17 +20,6 @@ public class ReturnService {
     public ReturnService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
-    public ReturnInfo specificReturn(Integer id) {
-        String url = String.format("http://localhost:3001/return/%d",id);
-//        String url = "http://localhost:3001/return/1";
-        RestTemplate restTemplate = new RestTemplate();
-        String jsonFile = restTemplate.getForObject(url, String.class);
-        try {
-            return objectMapper.readValue(jsonFile, ReturnInfo.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public List<ReturnInfo> allReturnInfo(DataFetchingEnvironment environment) {
         /** Here could be different logic of hitting outside API based on environment's content */

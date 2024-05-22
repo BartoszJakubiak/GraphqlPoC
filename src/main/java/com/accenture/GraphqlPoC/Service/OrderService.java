@@ -1,21 +1,29 @@
 package com.accenture.GraphqlPoC.Service;
 
 import com.accenture.GraphqlPoC.Model.Parts.Order;
+import graphql.schema.DataFetchingEnvironment;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
     private List<Order> orders = new ArrayList<>();
 
-    public Order specificOrder(Integer id) {
-        return orders.get(id);
-    }
-    public List<Order> allOrders() {
-        return orders;
+    public List<Order> allOrders(DataFetchingEnvironment environment) {
+        List<Order> orderList = new ArrayList<>();
+
+        if (environment.containsArgument("id")) {
+            orderList = orders.stream()
+                    .filter(l -> l.id().equals(Integer.valueOf(environment.getArgument("id"))))
+                    .collect(Collectors.toList());
+            return orderList;
+        }
+        orderList.addAll(orders);
+        return orderList;
     }
 
     @PostConstruct

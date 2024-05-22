@@ -20,14 +20,6 @@ public class ReturnInfoResolver {
     }
 
     @Async
-    @QueryMapping
-    public CompletableFuture<ReturnInfo> returnInfo(@Argument Integer id) {
-        System.out.println("ReturnInfo resolver - breakpoint");
-        return CompletableFuture.completedFuture(returnService.specificReturn(id));
-    }
-
-    @Async
-    @QueryMapping
     public CompletableFuture<List<ReturnInfo>> allReturnInfo(DataFetchingEnvironment environment) {
         System.out.println("ReturnInfo resolver - breakpoint");
         return CompletableFuture.completedFuture(returnService.allReturnInfo(environment));
