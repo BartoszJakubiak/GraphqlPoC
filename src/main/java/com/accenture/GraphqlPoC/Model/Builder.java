@@ -13,27 +13,28 @@ public class Builder {
 
     public Builder() {}
 
-    public Builder order(Order order) {
+    public void order(Order order) {
         this.order = order;
-        return this;
     }
 
-    public Builder shipment(Shipment shipment) {
+    public void shipment(Shipment shipment) {
         this.shipment = shipment;
-        return this;
     }
 
-    public Builder returnInfo(ReturnInfo returnInfo) {
+    public void returnInfo(ReturnInfo returnInfo) {
         this.returnInfo = returnInfo;
-        return this;
     }
 
     public OrderSummary build() {
         OrderSummary orderSummary = new OrderSummary(this);
+        clear();
+        return orderSummary;
+    }
+
+    public void clear() {
         this.order = null;
         this.shipment = null;
         this.returnInfo = null;
-        return orderSummary;
     }
 }
 

@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 @Component
 public class AllOrdersDataFetcher implements DataFetcher<Object> {
 
@@ -30,6 +32,7 @@ public class AllOrdersDataFetcher implements DataFetcher<Object> {
         this.shipmentResolver = sr;
         this.builder = b;
     }
+
     @Override
     public Object get(DataFetchingEnvironment environment) throws Exception {
         List<Order> orders = orderResolver.allOrders();
@@ -40,28 +43,44 @@ public class AllOrdersDataFetcher implements DataFetcher<Object> {
         CompletableFuture<List<Shipment>> shipmentAsync = null;
 
         if (selectionSet.contains("returnInfo")) {
-            returnInfoAsync = returnInfoResolver.allReturnInfo();
+            returnInfoAsync = returnInfoResolver.allReturnInfo(environment);
             asyncParts.add(returnInfoAsync);
         }
         if (selectionSet.contains("shipment")) {
-            shipmentAsync = shipmentResolver.allShipment();
+            shipmentAsync = shipmentResolver.allShipment(environment);
             asyncParts.add(shipmentAsync);
         }
 
         CompletableFuture<?>[] asyncPartsThreads = asyncParts.toArray(new CompletableFuture[0]);
         CompletableFuture.allOf(asyncPartsThreads).join();
 
+        /** Stitching results together - returning only complete OrderSummaries*/
 
         List<OrderSummary> orderSummaries = new ArrayList<>();
-        for (Order order: orders) {
+        for (Order order : orders) {
             builder.order(order);
             if (selectionSet.contains("returnInfo")) {
-                builder.returnInfo(returnInfoAsync.get()
-                        .get(order.returnID()));
+                ReturnInfo returnInfo = returnInfoAsync.get().stream()
+                        .filter(l -> l.id().equals(order.returnID()))
+                        .findFirst()
+                        .orElse(null);
+                if (returnInfo == null) {
+                    builder.clear();
+                    continue;
+                }
+                builder.returnInfo(returnInfo);
+
             }
             if (selectionSet.contains("shipment")) {
-                builder.shipment(shipmentAsync.get()
-                        .get(order.shipmentID()));
+                Shipment shipment = shipmentAsync.get().stream()
+                        .filter(l -> l.id().equals(order.shipmentID()))
+                        .findFirst()
+                        .orElse(null);
+                if (shipment == null) {
+                    builder.clear();
+                    continue;
+                }
+                builder.shipment(shipment);
             }
             orderSummaries.add(builder.build());
         }

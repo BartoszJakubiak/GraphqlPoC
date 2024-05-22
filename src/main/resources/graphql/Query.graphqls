@@ -3,7 +3,7 @@ type Query {
     returnInfo(id: ID): ReturnInfo
     shipment(id: ID): Shipment
 
-    allReturnInfo: [ReturnInfo]
+    allReturnInfo(accepted: Boolean): [ReturnInfo]
     allShipment: [Shipment]
-    allOrderSummary: [OrderSummary]
+    allOrderSummary(accepted: Boolean, delayed: Boolean): [OrderSummary]
 }

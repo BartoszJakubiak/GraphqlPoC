@@ -2,6 +2,7 @@ package com.accenture.GraphqlPoC.Resolver.PartsResolvers;
 
 import com.accenture.GraphqlPoC.Model.Parts.Shipment;
 import com.accenture.GraphqlPoC.Service.ShipmentService;
+import graphql.schema.DataFetchingEnvironment;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.scheduling.annotation.Async;
@@ -27,8 +28,8 @@ public class ShipmentResolver {
 
     @Async
     @QueryMapping
-    public CompletableFuture<List<Shipment>> allShipment() {
+    public CompletableFuture<List<Shipment>> allShipment(DataFetchingEnvironment environment) {
         System.out.println("Shipment resolver - breakpoint");
-        return CompletableFuture.completedFuture(shipmentService.allShipment());
+        return CompletableFuture.completedFuture(shipmentService.allShipment(environment));
     }
 }
