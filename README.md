@@ -5,10 +5,8 @@ Purpose of this project is to check if it's possible
 to implement GraphQL solutions in the environment
 containing multiple __separate__ datasources.
 
-## TechStack ##
+## Dependencies ##
 
-This project was written in Java using SpringBoot.
-Required dependencies:
 ```
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -21,7 +19,6 @@ Required dependencies:
 ```
 
 ## Model ##
-### GraphQL ###
 For PoC purpose model was limited to very
 basic example. Model is based on 4 entities:
 - Order - which contains keys to other entities
@@ -46,6 +43,7 @@ type Shipment {
     id: ID!
     address: String
     date: String
+    delayed: Boolean
 }
 ```
 - OrderSummary - which contains all information regarding
@@ -58,70 +56,81 @@ type OrderSummary {
 }
 ```
 
-### Java ###
-
-To correctly map entities from GraphQL to Objects
-in Java it is required to make matching Class's names 
-and Field's names & types!
-```
-public record Order (Integer id, String info, Integer shipmentID, Integer returnID) {}
-
-public record ReturnInfo(Integer id, Boolean accepted, String reason) {}
-
-public record Shipment(Integer id, String address, String date) {}
-
-public class OrderSummary {
-    private final Order order;
-    private final Shipment shipment;
-    private final ReturnInfo returnInfo;
-    ...
-```
-
 ## Queries ##
 
-### GraphQL ###
+There is only single query availabe for users. This query returns list of 
+OrderSummary. 
+There are 3 optional arguments which affects returned result:
+
+- order's ID
+- returnInfo field (accepted)
+- shipment field (delayed)
 
 ```
 type Query {
-    orderSummary(id: ID): OrderSummary
-    returnInfo(id: ID): ReturnInfo
-    shipment(id: ID): Shipment
+    allOrderSummary(id: ID, accepted: Boolean, delayed: Boolean): [OrderSummary]
 }
 ```
 
-### Java ###
+This query is mapped with @QueryMapping annotation.
 
-In Java to correctly map queries from GraphQL
-we can use annotation '@QueryMapping' as long as 
-method name matches query name, otherwise in 
-other cases @SchemaMapping is required.
-If query requires argument similar to @RequestParam
-in REST we use @Argument in GraphQL. In other cases
-we can use DataFetchingEnvironment to get access
-to fields included in query.
 ```
-    @Async
     @QueryMapping
-    public CompletableFuture<ReturnInfo> returnInfo(@Argument Integer id) {
-        System.out.println("ReturnInfo resolver - breakpoint");
-        ReturnInfo returnInfo = returnService.specificReturn(id);
-        return CompletableFuture.completedFuture(returnInfo);
+    public Object allOrderSummary(DataFetchingEnvironment environment) {
+        try {
+            return allOrdersDataFetcher.get(environment);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 ```
-For more complex queries it might be required to
-define custom DataFetcher implementing DataFetcher<>
-interface. This way we can manage process of requesting
-data from inside and outside sources manually. 
+
+Logic behind this query is implemented in AllOrderDataFetcher class specifically
+_get()_ method with DataFetchingEnvironment environment passed.
+
+Using _environment.getSelectionSet()_ we can determine which resolvers
+to call (asynchronously) in order to get requested data in a query. Based on 
+_environment.getArgument("")_ we can pass optional arguments from query.
+
+At the end data fetched from all APIs are connected in OrderSummary entities
+and returned.
+
+
+## Notes ##
+
+- Data filtering could be passed on outside API using environment's content.
+Requesting all data from API each time query is used is just for PoC purposes.
+- Couldn't find a way to pass arguments to subqueries in GrapQL. That is way
+all the arguments are in main query.
+- Couldn't find a way for GraphQL to chain queries on it's own (OrderSummary
+query calls subqueries).
+- Outside APIs are mocked with Mockoon for testing purposes
+Shipment's API response 
 ```
-@Component
-public class CombinedDataFetcher implements DataFetcher<Object> {
-...
-    @Override
-        public Object get(DataFetchingEnvironment environment) throws Exception {
-    ...
-    return Object;
-    }
+[{
+  "id": 0,
+  "address": "123 Main St",
+  "date": "10-02-2024",
+  "delayed": true
+},
+{
+  "id": 1,
+  "address": "Groove Street",
+  "date": "30-04-2024",
+  "delayed": false
+}]
 }
 ```
-
-
+ReturnInfo's API response
+```
+[{
+  "id": 0,
+  "accepted": true,
+  "reason": "Item didn't meet expectations"
+},
+{
+  "id": 1,
+  "accepted": false,
+  "reason": "Item arrived broken"
+}]
+```
